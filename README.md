@@ -204,7 +204,7 @@ A Higher Order Component to build form &amp;input, support validators.
     ```
     其中type和name值必须传入。type只能为 `radio`和`checkbox`。
 
-#### 开发 & develop
+## 开发 & develop
 
     $ git clone git@github.com:qiqiboy/react-easyform.git
     $ cd react-easyform/
