@@ -24,7 +24,7 @@ class FieldGroup extends Component {
     }
 
     onChange = (e) => {
-        const checkedInputs = [].slice.call(this.$input.querySelectorAll('[name=' + this.props.name + ']'))
+        const checkedInputs = toArray(this.$input.querySelectorAll('[name=' + this.props.name + ']'))
             .filter(input => input.checked);
         const value = this.props.type == 'checkbox' ?
             checkedInputs.map(input => input.value) :
