@@ -43,13 +43,13 @@ class Form extends Component {
                     <div className="content">
                         <h3 className="form-title">账号</h3>
                         <div className="form-meta">这里示范了常见的用户名、密码表单如何使用，另外还有两次密码校验一致性检测</div>
-                        <Field type="text" placeholder="用户名" ref="username" required pattern={/^[\w]+$/} 
+                        <Field type="text" placeholder="用户名" ref="username" required pattern={/^[\w]+$/}
                             validMessage={{required: '请填写用户名', pattern: '用户名不能包含字母数字下划线以外的字符'}} />
                         <Field type="text" placeholder="请输入密码" ref="password" required confirmed={this.refs.confirm_password} validMessage={{required: '请填写密码'}} />
                         <Field type="text" placeholder="请再次输入密码" ref="confirm_password" confirm={this.refs.password} required validMessage={{required: '请填写密码', confirm: '两次密码不一致'}} />
                         <h3 className="form-title">性别</h3>
                         <div className="form-meta">单选组</div>
-                        <FieldGroup type="radio" ref="sex" name="sex" required 
+                        <FieldGroup type="radio" ref="sex" name="sex" required
                             validMessage={{required: '请选择性别'}}>
                             <Field label="男" value="0" />
                             <Field label="女" value="1" />

@@ -63,7 +63,7 @@ class FieldGroup extends Component {
     }
 
     render() {
-        let myProps = omit(this.props, 'onChange', ...filterProps);
+        let myProps = omit(this.props, 'onChange', 'onFocus', 'onBlur', ...filterProps);
         const {name, type, className, noError} = this.props;
         const {__errorLevel__} = this.props;
         const {$error, $dirty, $invalid, $touched, $focusing, $modelValue} = this.props.easyfield;
