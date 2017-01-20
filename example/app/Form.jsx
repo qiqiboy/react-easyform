@@ -81,7 +81,7 @@ class Form extends Component {
                                 <option value="86">中国+86</option>
                                 <option value="886">台湾+886</option>
                             </Field>
-                            <Field type="text" placeholder="请输入手机号" ref="phone" required pattern={params.tel_code === 86 ? /^1\d{10}$/ : /^\d{8}$/} validMessage={{required: '请填写手机号', pattern: '手机号格式错误'}} />
+                            <Field type="text" placeholder="请输入手机号" ref="phone" required pattern={params.tel_code === '86' ? /^1\d{10}$/ : /^\d{8}$/} validMessage={{required: '请填写手机号', pattern: '手机号格式错误'}} />
                         </div> : <Field type="text" placeholder="请输入邮箱" ref="email" required pattern={/^\w+@[.\w]+$/} validMessage={{required: '请填写邮箱', pattern: '邮箱格式错误'}} />}
                     </div>
                     <div className="sidebar">
