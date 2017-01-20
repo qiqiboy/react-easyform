@@ -1,4 +1,4 @@
-import React, {PureComponent as Component} from 'react';
+import React, {PureComponent as Component, Children} from 'react';
 import easyFieldWrapper from './easyFieldWrapper';
 import omit from 'lodash/omit';
 import objectValues from 'lodash/values';
@@ -45,6 +45,15 @@ class Field extends Component {
             'ef-pending': $pending
         }
 
+        const optionsChildren = [];
+        const children = [];
+
+        Children.forEach(this.props.children, (elem, index) => {
+            elem.type == 'option' ?
+                optionsChildren.push(elem) :
+                children.push(elem);
+        });
+
         myProps.ref = input => this.$input = input;
 
         //添加对应的错误的classname
@@ -56,8 +65,8 @@ class Field extends Component {
 
         return (
             <div className={(className ? className + ' ' : '') + classlist({'form-group': true, 'has-error': $invalid})}>
-                { this.renderByType(myProps, this.props.children) }
-                { myProps.type != 'select' ? this.props.children : null }
+                { this.renderByType(myProps, optionsChildren) }
+                { children }
                 {$error && !noError && __errorLevel__ &&
                         (__errorLevel__ == 1 && $focusing || __errorLevel__ == 2 && $dirty || __errorLevel__ == 3) ? 
                         <div className="ef-error-tip">{objectValues($error)[0]}</div> : null }

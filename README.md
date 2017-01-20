@@ -204,6 +204,19 @@ A Higher Order Component to build form &amp;input, support validators.
     ```
     其中type和name值必须传入。type只能为 `radio`和`checkbox`。
 
+* ### 表单校验 & Validators
+    暂时支持以下几种校验：
+    * required 
+    * pattern `{RegExp | Function}` 可以是正则或者一个函数，返回bool。通过传入函数可以实现各种复杂校验需求
+    * confirm  一致性检测，例如二次密码确认。值为其他表单项的引用，例如 `confirm={this.refs.password}`
+    * minLength  支持`FieldGroup`
+    * maxLength  支持`FieldGroup`
+    * min
+    * max
+
+    异步校验
+    * asyncValidator 函数返回promise
+
 ## 开发 & develop
 
     $ git clone git@github.com:qiqiboy/react-easyform.git
