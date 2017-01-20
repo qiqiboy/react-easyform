@@ -1,4 +1,4 @@
-import React, { Component, PropTypes, cloneElement, Children } from 'react';
+import React, { PureComponent as Component, PropTypes, cloneElement, Children } from 'react';
 import easyFieldWrapper from './easyFieldWrapper';
 import omit from 'lodash/omit';
 import objectValues from 'lodash/values';
@@ -18,22 +18,30 @@ class FieldGroup extends Component {
             defaultValue = [defaultValue];
         }
 
-        this.refs.input.value = defaultValue;
+        this.$input.value = defaultValue;
 
-        this.props.__init__(this.refs);
+        this.props.__init__(this.$input);
     }
 
     onChange = (e) => {
-        const checkedInputs = [].slice.call(this.refs.input.querySelectorAll('[name=' + this.props.name + ']'))
+        const checkedInputs = [].slice.call(this.$input.querySelectorAll('[name=' + this.props.name + ']'))
             .filter(input => input.checked);
         const value = this.props.type == 'checkbox' ?
             checkedInputs.map(input => input.value) :
             e.target.value;
 
-        this.refs.input.value = value;
+        this.$input.value = value;
 
         //触发FieldWrapper
         this.props.onChange(e);
+    }
+
+    onFocus = e => {
+        this.props.onFocus(e);
+    }
+
+    onBlur = e => {
+        this.props.onBlur(e);
     }
 
     getChecked(value) {
@@ -58,11 +66,13 @@ class FieldGroup extends Component {
         let myProps = omit(this.props, 'onChange', ...filterProps);
         const {name, type, className, noError} = this.props;
         const {__errorLevel__} = this.props;
-        const {$error, $dirty, $invalid, $touched, $modelValue} = this.props.easyfield;
+        const {$error, $dirty, $invalid, $touched, $focusing, $modelValue} = this.props.easyfield;
         const children = Children.map(this.props.children, (elem, index) => cloneElement(elem, {
             name, type,
             key: elem.key || index,
             __onChange__: this.onChange,
+            __onFocus__: this.onFocus,
+            __onBlur__: this.onBlur,
             ...this.getChecked(elem.props.value)
         }));
 
@@ -71,10 +81,11 @@ class FieldGroup extends Component {
             'ef-dirty': $dirty,
             'ef-valid': !$invalid,
             'ef-invalid': $invalid,
-            'ef-touched': $touched
+            'ef-touched': $touched,
+            'ef-focusing': $focusing
         }
 
-        myProps.ref = 'input';
+        myProps.ref = input => this.$input = input;
 
         //添加对应的错误的classname
         if($error) {

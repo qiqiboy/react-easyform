@@ -28,26 +28,21 @@ export default function(WrappedComponent, config = {}) {
             //$modelValue: ''
         }
 
-        getElem(refs) {
-            for(let name in refs) {
-                if(refs.hasOwnProperty(name)) {
-                    let ref = refs[name];
-                    return ref.state ? this.getElem(ref.refs) : ref;
-                }
-            }
+        getElem($input) {
+            return $input.state ? this.getElem($input.$input) : $input;
         }
 
-        parseValue = parser || (refs => {
-            const elem = this.getElem(refs);
+        parseValue = parser || ($input => {
+            const elem = this.getElem($input);
 
             const type = elem.type;
             return elem.nodeName.toUpperCase() == 'INPUT' && (type == 'radio' || type == 'checkbox') && !elem.checked ?
                     null : elem.value
         })
 
-        initField = refs => {
-            const elem = this.getElem(refs);
-            this.refs = refs;
+        initField = $input => {
+            const elem = this.getElem($input);
+            this.$input = $input;
 
             this.onChange();
 
@@ -63,7 +58,7 @@ export default function(WrappedComponent, config = {}) {
         }
 
         checkEqual(oldV, newV) {
-            const isRadio = this.getElem(this.refs).type == 'radio';
+            const isRadio = this.$input.type == 'radio';
 
             return !isRadio && oldV === newV;
         }
@@ -73,7 +68,7 @@ export default function(WrappedComponent, config = {}) {
          *
          */
         onChange = e => {
-            let value = this.parseValue(this.refs);
+            let value = this.parseValue(this.$input);
             let {$dirty, $modelValue} = this.state;
 
             const {onChange, __onChange__} = this.props;
@@ -117,13 +112,17 @@ export default function(WrappedComponent, config = {}) {
          *
          */
         onFocus = e => {
-            const {onFocus} = this.props;
+            const {onFocus, __onFocus__} = this.props;
 
             this.triggerState({
                 $focusing: true,
                 $touched: true
             })
             .then(() => e && onFocus && onFocus(e));
+
+            if(e && __onFocus__) {
+                __onFocus__(e);
+            }
         }
 
         /**
@@ -131,12 +130,16 @@ export default function(WrappedComponent, config = {}) {
          *
          */
         onBlur = e => {
-            const {onBlur} = this.props;
+            const {onBlur, __onBlur__} = this.props;
 
             this.triggerState({
                 $focusing: false
             })
             .then(() => e && onBlur && onBlur(e));
+
+            if(e && __onBlur__) {
+                __onBlur__(e);
+            }
         }
 
         //验证器，返回state对象
@@ -171,7 +174,7 @@ export default function(WrappedComponent, config = {}) {
                         }))
                         .then(state => {
                             //确保返回结果对应的是当前输入
-                            if(this.parseValue(this.refs) == value) {
+                            if(this.parseValue(this.$input) == value) {
                                 this.triggerState({
                                     ...state,
                                     $pending: false

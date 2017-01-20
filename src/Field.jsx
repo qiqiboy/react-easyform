@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {PureComponent as Component} from 'react';
 import easyFieldWrapper from './easyFieldWrapper';
 import omit from 'lodash/omit';
 import objectValues from 'lodash/values';
@@ -11,7 +11,7 @@ class Field extends Component {
     }
 
     componentDidMount() {
-        this.props.__init__(this.refs);
+        this.props.__init__(this.$input);
     }
 
     componentWillUnmount() {
@@ -32,7 +32,7 @@ class Field extends Component {
 
     render() {
         let myProps = omit(this.props, ...filterProps);
-        const {$error, $dirty, $focusing, $invalid, $touched} = this.props.easyfield;
+        const {$error, $dirty, $focusing, $invalid, $touched, $pending} = this.props.easyfield;
         const {className, noError} = this.props;
         const {__errorLevel__} = this.props;
         const classes = {
@@ -41,10 +41,11 @@ class Field extends Component {
             'ef-valid': !$invalid,
             'ef-invalid': $invalid,
             'ef-touched': $touched,
-            'ef-focusing': $focusing
+            'ef-focusing': $focusing,
+            'ef-pending': $pending
         }
 
-        myProps.ref = 'input';
+        myProps.ref = input => this.$input = input;
 
         //添加对应的错误的classname
         if($error) {
