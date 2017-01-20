@@ -1,8 +1,8 @@
-## react-easyform
+# react-easyform
 A Higher Order Component to build form &amp;input, support validators.  
 一个React高阶组件（HOC），用来方便的创建表单，支持各类表单验证，支持异步验证。
 
-##### 功能特色 & Features
+### 功能特色 & Features
 
 * 使用简便，具有详细的表单校验辅助html类名（classname）显示
 * 支持单选组、复选组表单
@@ -11,12 +11,16 @@ A Higher Order Component to build form &amp;input, support validators.
 * 支持异步验证
 * 通过内置的表单easyFieldwrapper包装器，可以自由定义表单输入项，以支持easyform
 
+### 预览
 
-#### 安装 & Installation
+* [在线示例 & Demo](http://u.boy.im/react-easyform/)
+* [完整代码示范](https://github.com/qiqiboy/react-easyform/blob/master/example/app/Form.jsx)
+
+## 安装 & Installation
 
      npm install --save react-easyform
 
-#### 开始使用 & Getting started
+## 开始使用 & Getting started
 
 * 登录表单示例
 ```javascript
@@ -60,7 +64,7 @@ A Higher Order Component to build form &amp;input, support validators.
     import React, {  Component, PropTypes } from 'react';
     import EasyForm, { Field, FieldGroup } from 'react-easyform';
 
-    class Form extens Component {
+    class Form extends Component {
         componentDidMount() {
             /* 必须有，用来初始化表单项 */
             this.props.easyform.init(this.refs);
@@ -103,8 +107,8 @@ A Higher Order Component to build form &amp;input, support validators.
     export default EasyForm(Form);
 ```
 
-#### 文档API & Documention
-* ##### EasyForm {Function}
+## 文档API & Documention
+* ### EasyForm {Function}
     高阶组件包装器，你的表单组件需要使用该方法包装后返回。
 
     ```javascript
@@ -140,7 +144,7 @@ A Higher Order Component to build form &amp;input, support validators.
     返回的高阶组件，props里会被注入两个属性：
     * `easyform` EasyForm的表单实例，保存了验证结果、表单项值、每个表单项的引用等
     * `params` 一个快捷访问表单参数的对象（easyform对象下也有该值）
-* ##### Field {High Order React-Component}
+* ### Field {High Order React-Component}
     表单项高阶组件，支持React对form输入项节点的所有属性，例如`defaultValue` `type` `onChange`等；也支持各种事件绑定。
     
     ```html
@@ -181,7 +185,7 @@ A Higher Order Component to build form &amp;input, support validators.
 
      具体可以参看示例demo
 
-* ##### FieldGroup {High Order React-Component}
+* ### FieldGroup {High Order React-Component}
     表单项组，暂时只支持 单选和复选。
     ```html
         <h3>性别</h3>
