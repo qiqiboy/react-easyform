@@ -150,19 +150,22 @@ A Higher Order Component to build form &amp;input, support validators.
     ```html
         <Field type="password" placeholder="请输入密码" onChange={this.onChange} />
         <Field type="password" placeholder="请输入密码" onFocus={this.onFocus} defaultValue="12345" />
-        <Field type="select" placeholder="请输入密码">
+        <Field type="select" placeholder="请选择性别">
             <option value="">请选择</option>
             <option value="0">女</option>
             <option value="1">男</option>
         </Field>
-        <Field type="radio" label="单选项描述这里传入" onChange={this.change} />
-        <Field type="checkbox" label="复选项描述这里传入" onChange={this.change} />
+        <Field type="radio" label="单选项描述这里传入" />
+        <Field type="checkbox" label="复选项描述这里传入" />
+        <Field type="search" />
+        <Field type="textarea" />
     ```
 
     有几点需要注意：
     * 如果是单选或者复选，label必须通过属性 `label` 传入
     * 如果有默认值，要使用 `defaultValue` 传入，如果使用 `value` 也会导致组件成为一个受限组件（controlled components）
     * 下拉框，也要通过 Field 高阶组件创建，指定 `type="select"` 即可
+    * textarea，同样，指定 `type="textarea"` 即可
 
     使用Field生成的节点，会包含一组easyform验证结果classname：
     ```html

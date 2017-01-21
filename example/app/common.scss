@@ -38,6 +38,9 @@ pre{
         border-color: red;
     }
 }
+textarea.form-control{
+    height:auto;
+}
 .form-group-control{
     margin-bottom: 20px;
     > * {

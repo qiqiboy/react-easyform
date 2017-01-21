@@ -47,6 +47,7 @@ class Form extends Component {
                             validMessage={{required: '请填写用户名', pattern: '用户名不能包含字母数字下划线以外的字符'}} />
                         <Field type="text" placeholder="请输入密码" ref="password" required confirmed={this.refs.confirm_password} validMessage={{required: '请填写密码'}} />
                         <Field type="text" placeholder="请再次输入密码" ref="confirm_password" confirm={this.refs.password} required validMessage={{required: '请填写密码', confirm: '两次密码不一致'}} />
+                        <Field type="textarea" rows="8" placeholder="请输入个人简介" ref="bio" required validMessage={{required: '请填写个人简介'}} />
                         <h3 className="form-title">性别</h3>
                         <div className="form-meta">单选组</div>
                         <FieldGroup type="radio" ref="sex" name="sex" required

@@ -25,6 +25,8 @@ class Field extends Component {
             case 'radio':
             case 'checkbox':
                 return <label><input {...myProps} />{myProps.label}</label>
+            case 'textarea':
+                return <textarea {...myProps} />
             default:
                 return <input {...myProps} />
         }

@@ -1,6 +1,6 @@
 {
   "name": "react-easyform",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A Higher Order Component to build form &amp;input, support validators.",
   "main": "lib/index.js",
   "scripts": {
