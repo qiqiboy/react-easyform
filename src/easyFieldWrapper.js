@@ -22,10 +22,10 @@ export default function(WrappedComponent, config = {}) {
             $dirty: false,
             $touched: false,
             $focusing: false,
-            $pending: false
+            $pending: false,
             //$error: null,
             //$viewValue: '',
-            //$modelValue: ''
+            $modelValue: null
         }
 
         getElem($input) {
