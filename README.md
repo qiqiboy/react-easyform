@@ -28,11 +28,6 @@ A Higher Order Component to build form &amp;input, support validators.
     import EasyForm, { Field, FieldGroup } from 'react-easyform';
 
     class Form extends Component {
-        componentDidMount() {
-            /* 必须有，用来初始化表单项 */
-            this.props.easyform.init(this.refs);
-        }
-
         submit = ev => {
             alert('submit!');
         }
@@ -48,9 +43,9 @@ A Higher Order Component to build form &amp;input, support validators.
 
             return (
                 <form className="" onSubmit={this.submit} >
-                    <Field type="text" ref="username" required pattern={/^[\w]{5,10}$/} 
+                    <Field type="text" name="username" required pattern={/^[\w]{5,10}$/} 
                         validMessage={{required: '请填写用户名', pattern: '用户名不能包含字母数字下划线以外的字符'}} />
-                    <Field type="text" ref="password" required validMessage={{required: '请填写密码'}} />
+                    <Field type="text" name="password" required validMessage={{required: '请填写密码'}} />
                     <button className="btn-submit" disabled={$invalid ? 'disabled' : false}>提交</button>
                 </form>
             );
@@ -65,11 +60,6 @@ A Higher Order Component to build form &amp;input, support validators.
     import EasyForm, { Field, FieldGroup } from 'react-easyform';
 
     class Form extends Component {
-        componentDidMount() {
-            /* 必须有，用来初始化表单项 */
-            this.props.easyform.init(this.refs);
-        }
-
         submit = ev => {
             alert('submit!');
         }
@@ -86,12 +76,12 @@ A Higher Order Component to build form &amp;input, support validators.
             return (
                 <form className="" onSubmit={this.submit} >
                     <div>性别</div>
-                    <FieldGroup type="radio" ref="sex" required 
+                    <FieldGroup type="radio" name="sex" required 
                         validMessage={{required: '请选择性别'}}>
                         <Field label="男" value="0" />
                         <Field label="女" value="1" />
                     </FieldGroup>
-                    <FieldGroup type="checkbox" ref="hobbies" required minLength="2"
+                    <FieldGroup type="checkbox" name="hobbies" required minLength="2"
                         validMessage={{required: '请选择你的爱好', minLength: '至少选择两个爱好'}}>
                         <Field label="篮球" value="0" />
                         <Field label="足球" value="1" />
@@ -124,12 +114,6 @@ A Higher Order Component to build form &amp;input, support validators.
      * @return {HOC} 返回包装后的高阶组件
      */
     class MyFormContainer extends React.Component {
-        //这里不能省略，这里是初始化easyform
-        //init方法传入的值，是一个包含了对各个表单项节点的引用的map。最简单的就是直接传入 this.refs
-        componentDidMount() {
-            this.props.easyform.init(this.refs);
-        }
-
         render() {
             return (
                 <div></div>

@@ -6,11 +6,6 @@ class Form extends Component {
         regType: 'phone'
     }
 
-    componentDidMount() {
-        /* 必须有，用来初始化表单项 */
-        this.props.easyform.init(this.refs);
-    }
-
     submit = ev => {
         alert('submit!');
     }
@@ -43,14 +38,14 @@ class Form extends Component {
                     <div className="content">
                         <h3 className="form-title">账号</h3>
                         <div className="form-meta">这里示范了常见的用户名、密码表单如何使用，另外还有两次密码校验一致性检测</div>
-                        <Field type="text" placeholder="用户名" ref="username" required pattern={/^[\w]+$/}
+                        <Field type="text" placeholder="用户名" name="username" required pattern={/^[\w]+$/}
                             validMessage={{required: '请填写用户名', pattern: '用户名不能包含字母数字下划线以外的字符'}} />
-                        <Field type="text" placeholder="请输入密码" ref="password" required confirmed={this.refs.confirm_password} validMessage={{required: '请填写密码'}} />
-                        <Field type="text" placeholder="请再次输入密码" ref="confirm_password" confirm={this.refs.password} required validMessage={{required: '请填写密码', confirm: '两次密码不一致'}} />
-                        <Field type="textarea" rows="8" placeholder="请输入个人简介" ref="bio" required validMessage={{required: '请填写个人简介'}} />
+                        <Field type="text" placeholder="请输入密码" name="password" required confirmed={this.refs.confirm_password} validMessage={{required: '请填写密码'}} />
+                        <Field type="text" placeholder="请再次输入密码" name="confirm_password" confirm={this.refs.password} required validMessage={{required: '请填写密码', confirm: '两次密码不一致'}} />
+                        <Field type="textarea" rows="8" placeholder="请输入个人简介" name="bio" required validMessage={{required: '请填写个人简介'}} />
                         <h3 className="form-title">性别</h3>
                         <div className="form-meta">单选组</div>
-                        <FieldGroup type="radio" ref="sex" name="sex" required
+                        <FieldGroup type="radio" name="sex" required
                             validMessage={{required: '请选择性别'}}>
                             <Field label="男" value="0" />
                             <Field label="女" value="1" />
@@ -59,7 +54,7 @@ class Form extends Component {
                         <div className="form-meta">这里是一个多选组，可以通过 minLength="2" 要求至少选择2个。同理， maxLength="3" 将会限制至多选择三个。<br/>easyform将会将所选择的值转为一个数组。
                             <br/>如果需要默认值可以指定一个数组，例如 defaultValue={[1, 2]}
                         </div>
-                        <FieldGroup type="checkbox" ref="hobbies" name="hobbies" required minLength="2"
+                        <FieldGroup type="checkbox" name="hobbies" required minLength="2"
                             validMessage={{required: '请选择你的爱好', minLength: '至少选择两个爱好'}}>
                             <Field label="篮球" value="0" />
                             <Field label="足球" value="1" />
@@ -68,7 +63,7 @@ class Form extends Component {
                         </FieldGroup>
                         <h3 className="form-title">生日</h3>
                         <div className="form-meta">这里展示了下拉框如何使用，另外通过 max="1960" 限制了年龄要求</div>
-                        <Field type="select" ref="birthday" required max="1960" validMessage={{required: '请选择生日', max: '您的年纪不符合要求（必须是1960年以前出生的人）'}}>
+                        <Field type="select" name="birthday" required max="1960" validMessage={{required: '请选择生日', max: '您的年纪不符合要求（必须是1960年以前出生的人）'}}>
                             <option value="">请选择</option>
                             {this.getBirthdayYears()}
                         </Field>
@@ -78,12 +73,12 @@ class Form extends Component {
                             <br/><br/>
                             手机号这里支持多国手机号格式校验的输入，+86要求输入11位数字，+886要求输入8位数字。支持动态校验，输入手机号后再切换国家依然可以校验。</div>
                         {this.state.regType === 'phone' ? <div className="form-inline-half">
-                            <Field type="select" ref="tel_code" confirmed={this.refs.phone} max="1960">
+                            <Field type="select" name="tel_code" confirmed={this.refs.phone} max="1960">
                                 <option value="86">中国+86</option>
                                 <option value="886">台湾+886</option>
                             </Field>
-                            <Field type="text" placeholder="请输入手机号" ref="phone" required pattern={params.tel_code === '86' ? /^1\d{10}$/ : /^\d{8}$/} validMessage={{required: '请填写手机号', pattern: '手机号格式错误'}} />
-                        </div> : <Field type="text" placeholder="请输入邮箱" ref="email" required pattern={/^\w+@[.\w]+$/} validMessage={{required: '请填写邮箱', pattern: '邮箱格式错误'}} />}
+                            <Field type="text" placeholder="请输入手机号" name="phone" required pattern={params.tel_code === '86' ? /^1\d{10}$/ : /^\d{8}$/} validMessage={{required: '请填写手机号', pattern: '手机号格式错误'}} />
+                        </div> : <Field type="text" placeholder="请输入邮箱" name="email" required pattern={/^\w+@[.\w]+$/} validMessage={{required: '请填写邮箱', pattern: '邮箱格式错误'}} />}
                     </div>
                     <div className="sidebar">
                         <button className="btn-submit" disabled={$invalid ? 'disabled' : false}>提交</button>

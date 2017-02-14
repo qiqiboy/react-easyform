@@ -1,73 +1,15 @@
 import React, { Component, PropTypes } from 'react';
 import each from 'lodash/each';
 
-class EasyForm {
-    constructor() {
-        this.$valid = true;
-        this.$invalid = false;
-        this.$dirty = false;
-        this.$touched = false;
-        this.params = {};
-        this.refs = {};
+let formId = 0;
 
-        this.stateRefs = {};
-    }
+export default function(WrappedComponent, config = {}) {
+    config = Object.assign({
+        errorLevel : 1,
+        defaultErrorMsg :  'Your input is incorrect.',
+        defaultPendingMsg : 'Waiting...'
+    }, config);
 
-    init(refs) {
-        this.refs = refs;
-    }
-
-    update() {
-        let errors = {};
-        let params = {};
-        let $invalid = false;
-        let $touched = false;
-        let $dirty = false;
-        let stateRefs = {};
-
-        const handler = refs => {
-            each(refs, (ref, name) => {
-                const state = ref.state || {};
-
-                //这里循环处理下，遇到子easyform组件时
-                if (state.easyform) {
-                    handler(state.easyform.refs);
-                } else {
-                    params[name] = ref.state ? state.$modelValue : ref.value;
-
-                    if (state.$invalid) {
-                        errors[name] = state.$error;
-                    }
-
-                    $invalid = $invalid || state.$invalid;
-                    $touched = $touched || state.touched;
-                    $dirty = $dirty || state.$dirty;
-
-                    stateRefs[name] = state;
-                }
-            });
-        }
-
-        handler(this.refs);
-
-        this.params = params;
-        this.$error = $invalid ? errors : null;
-        this.$valid = !$invalid;
-        this.$invalid = $invalid;
-        this.$dirty = $dirty;
-        this.$touched = $touched;
-
-        this.stateRefs = stateRefs;
-
-        return this;
-    }
-
-    get(name) {
-        return this.stateRefs[name] || {}
-    }
-}
-
-export default function(WrappedComponent, errorLevel = 1) {
     /*!
      * @param {Number} errorLeve
      *    0: 关闭错误
@@ -78,18 +20,47 @@ export default function(WrappedComponent, errorLevel = 1) {
      */
     return class FormWrapper extends Component {
         state = {
-            easyform: new EasyForm(),
+            $valid: true,
+            $invalid: false,
+            $dirty: false,
+            $touched: false,
+            $focusing: false,
+            $pending: false,
+            error: {},
+            stateRefs: {},
             params: {}
         }
 
         latestUpdateTime = 0;
         INTERVAL = 20;
+        formControls = {};
+        formId = formId++;
 
         getChildContext() {
             return {
-                __easyformRender__: this.formUpdate,
-                __errorLevel__: errorLevel
+                $$render: this.formUpdate,
+                $$register: this.register,
+                $$config: config,
+                $$getControl: name => this.formControls[name]
             }
+        }
+
+        /**
+         * 注册表单项
+         * @param {String} name 表单项名字
+         * @param {Element} input 表单项
+         */
+        register = (name, input) => {
+            if(input) {
+                this.formControls[name] = input;
+            } else {
+                delete this.formControls[name];
+            }
+        }
+
+        refCallback = input => {
+            input &&
+                this.state.easyform.init(this.formControls);
         }
 
         formUpdate = () => {
@@ -104,14 +75,10 @@ export default function(WrappedComponent, errorLevel = 1) {
                     this.latestUpdateTime = Date.now();
                     delete this.renderHandlerPromise;
 
-                    const easyform = this.state.easyform.update();
-                    this.setState({
-                        easyform: easyform,
-                        params: easyform.params
-                    }, () => {
+                    this.setState(this.getNewState(), () => {
                         //如果是嵌套的表单，需要主动触发父级表单render
-                        if (this.context.__easyformRender__) {
-                            this.context.__easyformRender__()
+                        if (this.context.$$render) {
+                            this.context.$$render()
                                 .then(resolve);
                         } else {
                             resolve();
@@ -121,21 +88,78 @@ export default function(WrappedComponent, errorLevel = 1) {
             }));
         }
 
+        getNewState() {
+            let params = {},
+                error = {},
+                stateRefs = {},
+                $invalid = false,
+                $touched = false,
+                $dirty = false;
+
+            let newState = {
+                params, stateRefs
+            };
+
+            const process = refs => {
+                each(refs, (ref, name) => {
+                    if(ref.formControls) {
+                        process(ref.formControls);
+                    } else {
+                        let state = ref.state || {};
+                        params[name] = state.$modelValue;
+
+                        if(state.$invalid) {
+                            error[name] = state.$error;
+                        }
+
+                        $invalid = $invalid || state.$invalid;
+                        $touched = $touched || state.touched;
+                        $dirty = $dirty || state.$dirty;
+
+                        stateRefs[name] = state;
+                    }
+                });
+            }
+
+            process(this.formControls);
+
+            newState.$error = $invalid ? error : null;
+            newState.$valid = !$invalid;
+            newState.$invalid = $invalid;
+            newState.$dirty = $dirty;
+            newState.$touched = $touched;
+
+            return newState;
+        }
+
         componentWillUnmount() {
             this.isUnmount = true;
         }
 
+        refCallback = input => this.props.name &&
+                this.context.$$register &&
+                this.context.$$register(this.props.name, this);
+
         render() {
-            return <WrappedComponent {...this.props} {...this.state} />
+            const easyform = {
+                ...this.state,
+                get: name => this.state.stateRefs[name] || {}
+            }
+
+            return <WrappedComponent {...this.props} easyform={easyform} params={this.state.params} ref={this.refCallback} />
         }
 
         static contextTypes = {
-            __easyformRender__: PropTypes.func
+            $$render: PropTypes.func,
+            $$register: PropTypes.func
         }
 
         static childContextTypes = {
-            __easyformRender__: PropTypes.func,
-            __errorLevel__: PropTypes.number
+            $$render: PropTypes.func,
+            $$register: PropTypes.func,
+            $$config: PropTypes.object,
+            $$getControl: PropTypes.func
         }
     }
 }
+

@@ -1,20 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import each from 'lodash/each';
 
-const $defaultValidators = {
-    required: value => value != null && value.length > 0,
-    pattern: (value, pattern) => !pattern || (typeof pattern == 'function' ? pattern(value) : pattern.test(value)),
-    confirm: (value, confirmed) => !confirmed.state.$viewValue || value == confirmed.state.$viewValue,
-    minLength: (value, length) => value.length >= parseInt(length),
-    maxLength: (value, length) => value.length <= parseInt(length),
-    min: (value, minValue) => parseFloat(value) >= parseFloat(minValue),
-    max: (value, maxValue) => parseFloat(value) <= parseFloat(maxValue)
-}
-
 export default function(WrappedComponent, config = {}) {
-    const {parser, validator} = config;
-    const $validators = {...$defaultValidators, ...(validator || {})};
-
     return class FieldWrapper extends Component {
         state = {
             $valid: true,
@@ -23,138 +10,135 @@ export default function(WrappedComponent, config = {}) {
             $touched: false,
             $focusing: false,
             $pending: false,
-            //$error: null,
-            //$viewValue: '',
+            $error: null,
+            $viewValue: null,
             $modelValue: null
         }
 
-        getElem($input) {
-            return $input.state ? this.getElem($input.$input) : $input;
-        }
-
-        parseValue = parser || ($input => {
-            const elem = this.getElem($input);
-
-            const type = elem.type;
-            return elem.nodeName.toUpperCase() == 'INPUT' && (type == 'radio' || type == 'checkbox') && !elem.checked ?
-                    null : elem.value
-        })
-
-        initField = $input => {
-            const elem = this.getElem($input);
-            this.$input = $input;
-
-            this.onChange();
-
-            if(document.activeElement == elem) {
-                this.onFocus();
-            }
-        }
-
-        destroy = () => {
-            if(this.context.__easyformRender__) {
-                this.context.__easyformRender__();
-            }
-        }
-
-        checkEqual(oldV, newV) {
-            const isRadio = this.$input.type == 'radio';
-
-            return !isRadio && oldV === newV;
+        validatorHandlers = {
+            required: value => !!value && value.length > 0,
+            pattern: (value, pattern) => !pattern || (typeof pattern === 'function' ? pattern(value) : pattern.test(value)),
+            confirm: (value, confirmed) => !confirmed || value === confirmed,
+            minLength: (value, length) => value.length >= parseInt(length),
+            maxLength: (value, length) => value.length <= parseInt(length),
+            min: (value, minValue) => parseFloat(value) >= parseFloat(minValue),
+            max: (value, maxValue) => parseFloat(value) <= parseFloat(maxValue)
         }
 
         /**
-         * 用户输入处理
-         *
+         * 节点引用回调
          */
-        onChange = e => {
-            let value = this.parseValue(this.$input);
-            let {$dirty, $modelValue} = this.state;
+        refCallback = input => {
+            this.$input = input;
+            if(!this.props.groupField && this.props.name) {
+                this.context.$$register(this.props.name, input && this);
+            }
 
-            const {onChange, __onChange__} = this.props;
-            const state = this.validate(value);
-
-            const target = e && e.target;
-            const type = e && e.type;
-
-            const confirmField = this.props.confirm || this.props.confirmed;
-
-            const triggerOnChange = () => {
-                if(e && onChange && !this.checkEqual($modelValue, state.$modelValue)) {
-                    onChange({
-                        target, type
-                    });
+            if(input) {
+                if(typeof input.getValue !== 'function') {
+                    throw new Error('The FieldWrappedComponent class must have a method named "getValue".');
                 }
 
-                //confirm验证
-                if(e && confirmField) {
-                    confirmField.onChange();
-                }
-            }
+                this.getInputValue = input.getValue;
 
-            if(e && 'stopPropagation' in e) {
-                e.stopPropagation();
+                //设置初始state
+                this.updateState();
+            } else {
+                this.context.$$render();
             }
+        }
 
-            this.triggerState({
-                ...state,
-                $dirty: $dirty || !!e
-            })
-            .then(triggerOnChange);
+        isEqual(oldValue, newValue) {
+            const isRadio = this.props.type == 'radio';
 
-            if(e && __onChange__) {
-                __onChange__(e);
-            }
+            return !isRadio && oldValue === newValue;
         }
 
         /**
-         * 输入框获得焦点处理
-         *
+         * 事件处理
+         * @param {String} type 事件名称
          */
-        onFocus = e => {
-            const {onFocus, __onFocus__} = this.props;
+        handleEvent = (type, _ev) => {
+            const ev = {
+                type,
+                target: _ev ? _ev.target : this.$input
+            };
 
-            this.triggerState({
-                $focusing: true,
-                $touched: true
-            })
-            .then(() => e && onFocus && onFocus(e));
+            switch(type) {
+                case 'change':
+                    const { onChange } = this.props;
 
-            if(e && __onFocus__) {
-                __onFocus__(e);
+                    if(this.props['data-groupField']) {
+                        onChange &&
+                            onChange(ev);
+                    } else {
+                        const value = this.getInputValue();
+                        const { $modelValue } = this.state;
+
+                        const newState = this.getNewState(value);
+
+                        this.handleState({
+                            ...newState,
+                            $dirty: true
+                        })
+                            .then(() => {
+                                if(this.isEqual($modelValue, newState.$modelValue) === false) {
+                                    onChange &&
+                                        onChange(ev);
+                                }
+
+                                //confirmed
+                                const confirmedName = this.props.confirm || this.props.confirmed;
+                                if(confirmedName && this.context.$$getControl(confirmedName)) {
+                                    this.context.$$getControl(confirmedName).updateState();
+                                }
+                            });
+                    }
+
+                    break;
+                case 'focus':
+                case 'blur':
+                    const isFocus = type == 'focus';
+                    const handler = this.props[type == 'focus' ? 'onFocus' : 'onBlur'];
+                    if(this.props['data-groupField']) {
+                        handler &&
+                                handler(ev);
+                    } else {
+                        this.handleState({
+                            $focusing: isFocus,
+                            $touched: this.state.$touched || isFocus
+                        })
+                        .then(() => {
+                            handler &&
+                                handler(ev);
+                        });
+                    }
+
+                    break;
+                default:
+                    break;
             }
         }
 
-        /**
-         * 输入框失去焦点处理
-         *
-         */
-        onBlur = e => {
-            const {onBlur, __onBlur__} = this.props;
-
-            this.triggerState({
-                $focusing: false
-            })
-            .then(() => e && onBlur && onBlur(e));
-
-            if(e && __onBlur__) {
-                __onBlur__(e);
-            }
+        updateState() {
+            this.handleState(this.getNewState(this.getInputValue()));
         }
 
-        //验证器，返回state对象
-        validate(value) {
-            let $invalid = false,
-                $error = {},
-                props = this.props,
-                $pending = !!props.asyncValidator;
-
-            const {$dirty, $touched} = this.state;
+        getNewState(value) {
+            const props = this.props;
             const validMessage = props.validMessage || {};
 
-            each($validators, (validator, name) => {
-                if((value || name == 'required') && props[name] && !validator(value, props[name])) {
-                    $error[name] = validMessage[name] || '请检查输入';
+            let $error = {},
+                $invalid = false,
+                $pending = !!props.asyncValidator;
+
+            each(this.validatorHandlers, (checker, type) => {
+                const propValue = type == 'confirm' ?
+                    this.context.$$getControl(props[type]) && this.context.$$getControl(props[type]).state.$modelValue :
+                    props[type];
+
+                if((name === 'required' || !$error.required) && props[type] && checker(value, propValue) === false) {
+                    $error[type] = validMessage[type] || this.context.$$config.defaultErrorMsg;
                     $invalid = true;
                 }
             });
@@ -174,8 +158,8 @@ export default function(WrappedComponent, config = {}) {
                         }))
                         .then(state => {
                             //确保返回结果对应的是当前输入
-                            if(this.parseValue(this.$input) == value) {
-                                this.triggerState({
+                            if(this.getInputValue() === value) {
+                                this.handleState({
                                     ...state,
                                     $pending: false
                                 });
@@ -185,12 +169,10 @@ export default function(WrappedComponent, config = {}) {
                     console.error(e)
                 }
 
-                $error = {asyncValidator: '正在验证...'}
+                $error = {asyncValidator: validMessage.asyncValidator || this.context.$$config.defaultPendingMsg}
             }
 
             return {
-                $dirty,
-                $touched,
                 $invalid,
                 $pending,
                 $valid: !$invalid,
@@ -201,47 +183,37 @@ export default function(WrappedComponent, config = {}) {
             }
         }
 
-        triggerState(state) {
-            return new Promise(resolve => this.setState(state, () => {
-                if(this.context.__easyformRender__) {
-                    this.context.__easyformRender__()
-                        .then(resolve);
-                } else {
-                    resolve();
-                }
-            }));
-        }
-
-        getErrorMsg(errKey) {
-            const validMessage = this.props.validMessage || {};
-            return validMessage[errKey] || '请检查输入';
-        }
-
         /**
-         * 设置验证状态
-         * @param {string} key 错误key
-         * @param {bool} 结果，true表示
+         * 设置新state，返回promise，表单render后触发resolve
+         * @param {Object} newState 新的状态对象
+         *
+         * @return {Promise}
          */
-        setValidity(validationErrorKey, isValid) {
-            const {$invalid, $error} = this.state;
-
-            if($error) {
-                delete $error[validationErrorKey];
+        handleState(newState) {
+            if(!this.isUnmount) {
+                return new Promise(resolve => this.setState(newState, () => {
+                    if(this.context.$$render) {
+                        this.context.$$render()
+                            .then(resolve);
+                    } else {
+                        resolve();
+                    }
+                }));
             }
+        }
 
-            const $newInvalid = Object.keys($error || {}).length > 0 || !isValid;
-
-            this.triggerState({
-                $invalid: $newInvalid,
-                $valid: !$newInvalid,
-                $error: $newInvalid ? Object.assign({}, $error, isValid ? {} : {
-                    [validationErrorKey]: this.getErrorMsg(validationErrorKey)
-                }) : null
-            });
+        componentWillUnmount() {
+            this.isUnmount = true;
         }
 
         render() {
-            return <WrappedComponent {...this.props} {...this.context} easyfield={this.state || {}} onChange={this.onChange} onFocus={this.onFocus} onBlur={this.onBlur} __init__={this.initField} __destroy__={this.destroy} />
+            const myProps = {
+                ref: this.refCallback,
+                $trigger: this.handleEvent,
+                $errorLevel: this.context.$$config.errorLevel,
+                easyfield: this.state || {}
+            }
+            return <WrappedComponent {...this.props} {...myProps} />
         }
 
         static propTypes = {
@@ -250,8 +222,10 @@ export default function(WrappedComponent, config = {}) {
         }
 
         static contextTypes = {
-            __easyformRender__: PropTypes.func,
-            __errorLevel__: PropTypes.number
+            $$render: PropTypes.func,
+            $$register: PropTypes.func,
+            $$config: PropTypes.object,
+            $$getControl: PropTypes.func
         }
     }
 }
