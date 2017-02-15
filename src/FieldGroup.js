@@ -46,9 +46,7 @@ class FieldGroup extends Component {
                 checkedInputs.length ? checkedInputs[0].value : null;
     }
 
-    onChange = ev => this.props.$trigger('change', ev);
-    onFocus = ev => this.props.$trigger('focus', ev);
-    onBlur = ev => this.props.$trigger('blur', ev);
+    onEvent = ev => this.props.$trigger(ev);
 
     render() {
         const { $errorLevel, className, noError, type, name } = this.props;
@@ -76,9 +74,9 @@ class FieldGroup extends Component {
             name, type,
             key: elem.key || index,
             'data-groupField': true,
-            onChange: this.onChange,
-            onFocus: this.onFocus,
-            onBlur: this.onBlur,
+            onChange: this.onEvent,
+            onFocus: this.onEvent,
+            onBlur: this.onEvent,
             ...this.getChecked(elem.props.value)
         }));
 

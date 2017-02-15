@@ -26,7 +26,7 @@ export default function(WrappedComponent, config = {}) {
             $touched: false,
             $focusing: false,
             $pending: false,
-            error: {},
+            $error: null,
             stateRefs: {},
             params: {}
         }

@@ -58,13 +58,13 @@ export default function(WrappedComponent, config = {}) {
          * 事件处理
          * @param {String} type 事件名称
          */
-        handleEvent = (type, _ev) => {
-            const ev = {
-                type,
-                target: _ev ? _ev.target : this.$input
+        handleEvent = ev => {
+            const _ev = {
+                type: ev.type,
+                target: ev.target
             };
 
-            switch(type) {
+            switch(ev.type) {
                 case 'change':
                     const { onChange } = this.props;
 
@@ -98,8 +98,8 @@ export default function(WrappedComponent, config = {}) {
                     break;
                 case 'focus':
                 case 'blur':
-                    const isFocus = type == 'focus';
-                    const handler = this.props[type == 'focus' ? 'onFocus' : 'onBlur'];
+                    const isFocus = ev.type == 'focus';
+                    const handler = this.props[ev.type == 'focus' ? 'onFocus' : 'onBlur'];
                     if(this.props['data-groupField']) {
                         handler &&
                                 handler(ev);
@@ -126,7 +126,6 @@ export default function(WrappedComponent, config = {}) {
 
         getNewState(value) {
             const props = this.props;
-            const validMessage = props.validMessage || {};
 
             let $error = {},
                 $invalid = false,
@@ -138,7 +137,7 @@ export default function(WrappedComponent, config = {}) {
                     props[type];
 
                 if((name === 'required' || !$error.required) && props[type] && checker(value, propValue) === false) {
-                    $error[type] = validMessage[type] || this.context.$$config.defaultErrorMsg;
+                    $error[type] = this.getErrorMsg(type);
                     $invalid = true;
                 }
             });
@@ -153,7 +152,7 @@ export default function(WrappedComponent, config = {}) {
                         .catch(e => ({
                             $invalid: true,
                             $error: {
-                                asyncValidator: validMessage.asyncValidator || e.message
+                                asyncValidator: this.getErrorMsg('asyncValidator', e.message)
                             }
                         }))
                         .then(state => {
@@ -169,7 +168,7 @@ export default function(WrappedComponent, config = {}) {
                     console.error(e)
                 }
 
-                $error = {asyncValidator: validMessage.asyncValidator || this.context.$$config.defaultPendingMsg}
+                $error = {asyncValidator: this.context.$$config.defaultPendingMsg}
             }
 
             return {
@@ -200,6 +199,34 @@ export default function(WrappedComponent, config = {}) {
                     }
                 }));
             }
+        }
+
+        getErrorMsg(errKey, errMsg) {
+            const validMessage = this.props.validMessage || {};
+            return validMessage[errKey] || errMsg || this.context.$$config.defaultErrorMsg;
+        }
+
+         /**
+         * 设置验证状态
+         * @param {string} key 错误key
+         * @param {bool} 结果，true表示
+         */
+        setValidity = (validationErrorKey, isValid) => {
+            const {$error} = this.state;
+
+            if($error) {
+                delete $error[validationErrorKey];
+            }
+
+            const $newInvalid = Object.keys($error || {}).length > 0 || !isValid;
+
+            this.handleState({
+                $invalid: $newInvalid,
+                $valid: !$newInvalid,
+                $error: $newInvalid ? Object.assign({}, $error, isValid ? {} : {
+                    [validationErrorKey]: this.getErrorMsg(validationErrorKey)
+                }) : null
+            });
         }
 
         componentWillUnmount() {

@@ -47,9 +47,7 @@ class Field extends Component {
         return this.$input.value.trim();
     }
 
-    onChange = ev => this.props.$trigger('change', ev);
-    onFocus = ev => this.props.$trigger('focus', ev);
-    onBlur = ev => this.props.$trigger('blur', ev);
+    onEvent = ev => this.props.$trigger(ev);
 
     render() {
         const optionsChildren = []; //提取select项的option子节点
@@ -82,9 +80,9 @@ class Field extends Component {
         const myProps = {
             ...omit(this.props, ...filterProps),
             ref: this.refCallback,
-            onChange: this.onChange,
-            onFocus: this.onFocus,
-            onBlur: this.onBlur,
+            onChange: this.onEvent,
+            onFocus: this.onEvent,
+            onBlur: this.onEvent,
             className: Object
                         .keys($error || {})
                         .map(name => `ef-error-${name}`)
