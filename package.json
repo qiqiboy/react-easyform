@@ -1,6 +1,6 @@
 {
   "name": "react-easyform",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A Higher Order Component to build form &amp;input, support validators.",
   "main": "lib/index.js",
   "scripts": {
@@ -26,7 +26,6 @@
   "homepage": "https://github.com/qiqiboy/react-easyform#readme",
   "dependencies": {
     "lodash": "^4.17.4",
-    "object-assign": "^4.1.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2"
   },
@@ -61,6 +60,7 @@
     "eslint-plugin-react": "^6.9.0",
     "html-webpack-plugin": "^2.26.0",
     "node-sass": "^4.3.0",
+    "object-assign": "^4.1.1",
     "postcss-loader": "^1.2.2",
     "react-dev-utils": "^0.4.2",
     "sass-loader": "^4.1.1",

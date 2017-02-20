@@ -58,10 +58,10 @@ export default function(WrappedComponent, config = {}) {
          * 事件处理
          * @param {String} type 事件名称
          */
-        handleEvent = ev => {
-            const _ev = {
-                type: ev.type,
-                target: ev.target
+        handleEvent = (_ev, typeName) => {
+            const ev = {
+                type: typeName || _ev.type,
+                target: _ev.target
             };
 
             switch(ev.type) {

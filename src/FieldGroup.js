@@ -1,6 +1,7 @@
 import React, { PureComponent as Component, PropTypes, cloneElement, Children } from 'react';
 import easyFieldWrapper from './easyFieldWrapper';
 import objectValues from 'lodash/values';
+import find from 'lodash/find';
 
 class FieldGroup extends Component {
     getChecked(value) {
@@ -15,12 +16,16 @@ class FieldGroup extends Component {
 
         if(type == 'checkbox') {
             return {
-                checked: Array.isArray($viewValue) ? !!$viewValue.find(item => value == item ) : false
+                checked: Array.isArray($viewValue) ? !!find($viewValue, item => value == item ) : false
             }
         }
 
         return {};
     }
+
+    onChange = ev => this.props.$trigger(ev, 'change');
+    onFocus = ev => this.props.$trigger(ev, 'focus');
+    onBlur = ev => this.props.$trigger(ev, 'blur');
 
     /**
      * ref节点引用回调
@@ -45,8 +50,6 @@ class FieldGroup extends Component {
                 checkedInputs.map(input => input.value) :
                 checkedInputs.length ? checkedInputs[0].value : null;
     }
-
-    onEvent = ev => this.props.$trigger(ev);
 
     render() {
         const { $errorLevel, className, noError, type, name } = this.props;
@@ -74,9 +77,9 @@ class FieldGroup extends Component {
             name, type,
             key: elem.key || index,
             'data-groupField': true,
-            onChange: this.onEvent,
-            onFocus: this.onEvent,
-            onBlur: this.onEvent,
+            onChange: this.onChange,
+            onFocus: this.onFocus,
+            onBlur: this.onBlur,
             ...this.getChecked(elem.props.value)
         }));
 
