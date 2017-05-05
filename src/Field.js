@@ -65,6 +65,14 @@ class Field extends Component {
             classes.push('form-control');
         }
 
+        if(type == 'select' && this.$input) {
+            if(this.$input.selectedIndex == 0 &&
+                this.$input.options.length &&
+                this.$input.options[this.$input.selectedIndex].value == '') {
+                classes.push('ef-placeholder');
+            }
+        }
+
         "dirty valid invalid touched focusing pending"
             .split(" ")
             .forEach(name => {
