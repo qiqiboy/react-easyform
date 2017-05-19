@@ -5,9 +5,9 @@ let formId = 0;
 
 export default function(WrappedComponent, config = {}) {
     config = Object.assign({
-        errorLevel : 1,
-        defaultErrorMsg :  'Your input is incorrect.',
-        defaultPendingMsg : 'Waiting...'
+        errorLevel: 1,
+        defaultErrorMsg: 'Your input is incorrect.',
+        defaultPendingMsg: 'Waiting...'
     }, config);
 
     /*!
@@ -25,7 +25,6 @@ export default function(WrappedComponent, config = {}) {
             $dirty: false,
             $touched: false,
             $focusing: false,
-            $pending: false,
             $error: null,
             stateRefs: {},
             params: {}
@@ -51,7 +50,7 @@ export default function(WrappedComponent, config = {}) {
          * @param {Element} input 表单项
          */
         register = (name, input) => {
-            if(input) {
+            if (input) {
                 this.formControls[name] = input;
             } else {
                 delete this.formControls[name];
@@ -63,7 +62,7 @@ export default function(WrappedComponent, config = {}) {
                 this.state.easyform.init(this.formControls);
         }
 
-        formUpdate = () => {
+        formUpdate = (times = 0) => {
             const now = Date.now();
 
             return this.renderHandlerPromise || (this.renderHandlerPromise = new Promise(resolve => {
@@ -77,7 +76,7 @@ export default function(WrappedComponent, config = {}) {
 
                     this.setState(this.getNewState(), () => {
                         //如果是嵌套的表单，需要主动触发父级表单render
-                        if (this.context.$$render) {
+                        if (this.context.$$render && this.props.name) {
                             this.context.$$render()
                                 .then(resolve);
                         } else {
@@ -85,7 +84,39 @@ export default function(WrappedComponent, config = {}) {
                         }
                     });
                 }, Math.max(0, this.INTERVAL - now + this.latestUpdateTime));
-            }));
+            })).then(() => {
+                if (this.isEqualState(this.getNewState(), this.state) === false && times < 10) {
+                    this.formUpdate(++times);
+                }
+            });
+        }
+
+        isEqualState(newState, oldState) {
+            if (newState === oldState) {
+                return true;
+            }
+
+            if (typeof newState === 'object' && typeof oldState === 'object') {
+                //键值数量不一致
+                if (Object.keys(newState).length !== Object.keys(oldState).length) {
+                    return false;
+                }
+
+                for (let key in oldState) {
+                    if (oldState.hasOwnProperty(key)) {
+                        const oldValue = oldState[key];
+                        const newValue = newState[key];
+
+                        if (this.isEqualState(newValue, oldValue) === false) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         getNewState() {
@@ -94,27 +125,30 @@ export default function(WrappedComponent, config = {}) {
                 stateRefs = {},
                 $invalid = false,
                 $touched = false,
+                $focusing = false,
                 $dirty = false;
 
             let newState = {
-                params, stateRefs
+                params,
+                stateRefs
             };
 
             const process = refs => {
                 each(refs, (ref, name) => {
-                    if(ref.formControls) {
+                    if (ref.formControls) {
                         process(ref.formControls);
-                    } else {
+                    } else if (!ref.$input.props.disabled) {
                         let state = ref.state || {};
                         params[name] = state.$modelValue;
 
-                        if(state.$invalid) {
+                        if (state.$invalid) {
                             error[name] = state.$error;
                         }
 
-                        $invalid = $invalid || state.$invalid;
-                        $touched = $touched || state.touched;
-                        $dirty = $dirty || state.$dirty;
+                        $invalid = state.$invalid || $invalid;
+                        $touched = state.touched || $touched;
+                        $focusing = state.$focusing || $focusing;
+                        $dirty = state.$dirty || $dirty;
 
                         stateRefs[name] = state;
                     }
@@ -127,6 +161,7 @@ export default function(WrappedComponent, config = {}) {
             newState.$valid = !$invalid;
             newState.$invalid = $invalid;
             newState.$dirty = $dirty;
+            newState.$focusing = $focusing;
             newState.$touched = $touched;
 
             return newState;
@@ -137,8 +172,8 @@ export default function(WrappedComponent, config = {}) {
         }
 
         refCallback = input => this.props.name &&
-                this.context.$$register &&
-                this.context.$$register(this.props.name, this);
+            this.context.$$register &&
+            this.context.$$register(this.props.name, this);
 
         render() {
             const easyform = {
@@ -162,4 +197,3 @@ export default function(WrappedComponent, config = {}) {
         }
     }
 }
-
