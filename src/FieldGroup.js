@@ -1,4 +1,5 @@
-import React, { PureComponent as Component, PropTypes, cloneElement, Children } from 'react';
+import React, { PureComponent as Component, cloneElement, Children } from 'react';
+import PropTypes from 'prop-types';
 import easyFieldWrapper from './easyFieldWrapper';
 import objectValues from 'lodash/values';
 import find from 'lodash/find';
