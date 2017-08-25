@@ -137,7 +137,7 @@ export default function(WrappedComponent, config = {}) {
                     this.context.$$getControl(props[type]) && this.context.$$getControl(props[type]).state.$modelValue :
                     props[type];
 
-                if((name === 'required' || !$error.required) && props[type] && checker(value, propValue) === false) {
+                if((name === 'required' || !$error.required) && propValue != null && checker(value, propValue) === false) {
                     $error[type] = this.getErrorMsg(type);
                     $invalid = true;
                 }
