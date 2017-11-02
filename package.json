@@ -1,6 +1,6 @@
 {
   "name": "react-easyform",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A Higher Order Component to build form &amp;input, support validators.",
   "main": "lib/index.js",
   "scripts": {
@@ -24,9 +24,9 @@
     "url": "https://github.com/qiqiboy/react-easyform/issues"
   },
   "homepage": "https://github.com/qiqiboy/react-easyform#readme",
-  "dependencies": {
+  "peerDependencies": {
     "lodash": "4.17.4",
-    "prop-types": "15.5.10",
+    "prop-types": "15.6.0",
     "react": "15.6.0",
     "react-dom": "15.6.0"
   },
