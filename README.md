@@ -43,7 +43,7 @@ A Higher Order Component to build form &amp;input, support validators.
 
             return (
                 <form className="" onSubmit={this.submit} >
-                    <Field type="text" name="username" required pattern={/^[\w]{5,10}$/} 
+                    <Field type="text" name="username" required pattern={/^[\w]{5,10}$/}
                         validMessage={{required: '请填写用户名', pattern: '用户名不能包含字母数字下划线以外的字符'}} />
                     <Field type="text" name="password" required validMessage={{required: '请填写密码'}} />
                     <button className="btn-submit" disabled={$invalid ? 'disabled' : false}>提交</button>
