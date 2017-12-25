@@ -77,7 +77,7 @@ class FieldGroup extends Component {
         const children = Children.map(this.props.children, (elem, index) => cloneElement(elem, {
             name, type,
             key: elem.key || index,
-            'data-groupField': true,
+            'data-groupfield': true,
             onChange: this.onChange,
             onFocus: this.onFocus,
             onBlur: this.onBlur,

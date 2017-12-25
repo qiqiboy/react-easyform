@@ -69,7 +69,7 @@ export default function(WrappedComponent, config = {}) {
                 case 'change':
                     const { onChange } = this.props;
 
-                    if(this.props['data-groupField']) {
+                    if(this.props['data-groupfield']) {
                         onChange &&
                             onChange(ev);
                     } else {
@@ -101,7 +101,7 @@ export default function(WrappedComponent, config = {}) {
                 case 'blur':
                     const isFocus = ev.type == 'focus';
                     const handler = this.props[ev.type == 'focus' ? 'onFocus' : 'onBlur'];
-                    if(this.props['data-groupField']) {
+                    if(this.props['data-groupfield']) {
                         handler &&
                                 handler(ev);
                     } else {
